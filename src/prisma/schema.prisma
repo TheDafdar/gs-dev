@@ -9,6 +9,47 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Resume {
+  id      Int @id @default(autoincrement())
+  name    String @unique
+  summary String
+  version Int @default(1) @unique
+
+  experiences Experience[]
+  skills Skill[]
+}
+
+model Company {
+  id          Int       @id @default(autoincrement())
+  name        String       @unique
+  experiences Experience[]
+}
+
+model Experience {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  startDate   DateTime
+  endDate     DateTime?
+  companyId   Int
+  resumeId    Int
+
+  company Company @relation(fields: [companyId], references: [id])
+  resume  Resume  @relation(fields: [resumeId], references: [id])
+
+  @@unique(name: "experienceCompany", [title, companyId])
+}
+
+model Skill {
+  id Int @id @default(autoincrement())
+  name String @unique
+  level Int
+  color String
+  resumeId Int
+
+  resume Resume @relation(fields: [resumeId], references: [id])
 }
